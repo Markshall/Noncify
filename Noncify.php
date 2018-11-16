@@ -38,9 +38,9 @@ class Noncify {
   
   /**
     * @param $length  the amount of characters to be used in the random string
-                      not user defined. value is based on the $timeout param in generate()
-                      we divide the $timeout param by 4 and if its value is less than 8 then
-                      make the random string 8 chars long
+    *                 not user defined. value is based on the $timeout param in generate()
+    *                 we divide the $timeout param by 4 and if its value is less than 8 then
+    *                 make the random string 8 chars long
     * @return string  the randomly generated string
     */
   private static function randString($length) {
