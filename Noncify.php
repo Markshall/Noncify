@@ -18,8 +18,9 @@ class Noncify {
     }
     
     $salt = self::randString($timeout);
-    
-    $nonce = substr(sha1($key), 0, 15) . '.' . (time()+($timeout*60)) . '.' . $salt . '.' . sha1($salt . $key);
+    $timestamp = time() + ($timeout * 60);
+
+    $nonce = substr(sha1($key), 0, 15) . '.' . $timestamp . '.' . $salt . '.' . sha1("{$salt}.{$timestamp}.{$key}");
     return $nonce;
   }
   
@@ -32,7 +33,7 @@ class Noncify {
   public static function verify($nonce, $key) {
     $nonceBits = explode('.', $nonce);
     
-    return substr(sha1($key), 0, 15) === $nonceBits[0] && time() < $nonceBits[1] && sha1($nonceBits[2] . $key) === $nonceBits[3];
+    return substr(sha1($key), 0, 15) === $nonceBits[0] && time() < $nonceBits[1] && sha1("{$nonceBits[2]}.{$nonceBits[1]}.{$key}") === $nonceBits[3];
   }
   
   
