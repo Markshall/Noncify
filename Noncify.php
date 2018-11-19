@@ -9,7 +9,7 @@ class Noncify {
   
   /**
     * @param $key  the salt being used by the website
-    * @param $timeout  the amount of time (in minutes) after which the nonce will expire
+    * @param $timeout  the amount of time (in minutes) after which the nonce will expire. if value is not supplied, the default of 5 will be used
     * @return string  the generated nonce
     */
   public static function generate($key, $timeout=5) {
@@ -17,11 +17,7 @@ class Noncify {
       throw new InvalidArgumentException('Invalid arguments supplied');
     }
     
-    $salt = self::randString($timeout);
-    $timestamp = time() + ($timeout * 60);
-
-    $nonce = substr(sha1($key), 0, 15) . '.' . $timestamp . '.' . $salt . '.' . sha1("{$salt}.{$timestamp}.{$key}");
-    return $nonce;
+    return sha1($key) . '.' . ($timestamp=time()+($timeout*60)) . '.' . ($salt=self::randString($timeout)) . '.' . sha1("{$salt}.{$timestamp}.{$key}");
   }
   
   
@@ -31,9 +27,8 @@ class Noncify {
     * @return bool  if the nonce is valid and not expired
     */
   public static function verify($nonce, $key) {
-    $nonceBits = explode('.', $nonce);
-    
-    return substr(sha1($key), 0, 15) === $nonceBits[0] && time() < $nonceBits[1] && sha1("{$nonceBits[2]}.{$nonceBits[1]}.{$key}") === $nonceBits[3];
+    list($nonceStart, $timeout, $salt, $hash) = explode('.', $nonce);
+    return sha1($key) === $nonceStart && time() < $timeout && sha1("{$salt}.{$timeout}.{$key}") === $hash;
   }
   
   
@@ -49,11 +44,9 @@ class Noncify {
     $string  = '';
     $length /= 4;
     
-    if (strval($length) < 8)
-      $length = 8;
+    if (strval($length) < 8) $length = 8;
     
-    for ($i=0; $i<round($length); $i++)
-      $string .= $chars[mt_rand(0, strlen($chars)-1)];
+    for ($i=0; $i<round($length); $i++) $string .= $chars[mt_rand(0, strlen($chars)-1)];
     
     return $string;
   }
